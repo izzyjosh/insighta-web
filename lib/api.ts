@@ -34,7 +34,7 @@ export async function githubLogin() {
 }
 
 export async function getMe() {
-	const res = await apiFetch('/users/me');
+	const res = await apiFetch('/auth/me');
 	const data = await res.json();
 	return data.data;
 }
