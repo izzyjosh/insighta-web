@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getProfiles, exportProfiles } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { APIError } from '@/lib/error.handler';
 
 type Profile = {
   id: string;
@@ -99,9 +101,13 @@ export default function ProfilesPage() {
         setTotalPages(data.total_pages);
         setNextLink(data.links.next);
         setPrevLink(data.links.prev);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to fetch profiles', err);
         setProfiles([]);
+        setError(
+          (err as APIError).message ||
+            'Failed to fetch profiles. Please try again.'
+        );
       } finally {
         setLoading(false);
       }
@@ -137,9 +143,12 @@ export default function ProfilesPage() {
     setExporting(true);
     try {
       await exportProfiles({ gender, country });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Export failed:', err);
-      alert('Failed to export profiles');
+      toast.error(
+        (err as APIError).message ||
+          'Failed to export profiles. Please try again.'
+      );
     } finally {
       setExporting(false);
     }

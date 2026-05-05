@@ -3,6 +3,8 @@
 import { createProfile, getMe } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import { APIError } from '@/lib/error.handler';
 
 export default function CreateProfilePage() {
   const [name, setName] = useState('');
@@ -25,7 +27,7 @@ export default function CreateProfilePage() {
 
         setAuthorized(true);
       } catch {
-        router.replace('/login');
+        toast.error('You must be logged in as an admin to access this page');
       }
     };
 
@@ -50,7 +52,7 @@ export default function CreateProfilePage() {
       setSuccess('Profile created successfully');
       setName('');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof APIError ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }

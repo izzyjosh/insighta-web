@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { getProfiles } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { APIError } from '@/lib/error.handler';
 
 type Profile = {
   id: string;
@@ -77,9 +79,13 @@ export default function SearchPage() {
       setNextLink(data.links.next);
       setPrevLink(data.links.prev);
       setHasSearched(true);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Search failed', err);
       setResults([]);
+      toast.error(
+        (err as APIError).message ||
+          'Failed to search profiles. Please try again.'
+      );
     } finally {
       setLoading(false);
     }

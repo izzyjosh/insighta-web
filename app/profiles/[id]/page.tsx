@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getMe, getProfile } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { APIError } from '@/lib/error.handler';
 
 type Profile = {
   id: string;
@@ -34,10 +36,14 @@ export default function ProfileDetailPage() {
           getMe(),
         ]);
 
-        setProfile(data);
+        setProfile(data.data);
         setAccountId(user.id);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to fetch profile', err);
+        toast.error(
+          (err as APIError).message ||
+            'Failed to load profile. Please try again.'
+        );
       } finally {
         setLoading(false);
       }
