@@ -9,19 +9,34 @@ export default function CallbackPage() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      try {
-        const user = await getMe();
+      let retries = 0;
+      const maxRetries = 3;
+      
+      while (retries < maxRetries) {
+        try {
+          const user = await getMe();
 
-        // Redirect based on user role
-        if (user.role === 'admin') {
-          router.replace('/admin/dashboard');
-        } else {
-          router.replace('/profiles');
+          // Redirect based on user role
+          if (user.role === 'admin') {
+            router.replace('/admin/dashboard');
+          } else {
+            router.replace('/profiles');
+          }
+          return;
+        } catch (error) {
+          retries++;
+          console.error(`Authentication attempt ${retries} failed:`, error);
+          
+          if (retries < maxRetries) {
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         }
-      } catch (error) {
-        console.error('Authentication failed:', error);
-        router.replace('/login');
       }
+      
+      // After all retries fail, redirect to login
+      const returnTo = '/auth/callback';
+      router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`);
     };
 
     handleCallback();
