@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getMe } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { APIError } from '@/lib/error.handler';
 
 export default function CallbackPage() {
   const router = useRouter();
@@ -11,7 +13,7 @@ export default function CallbackPage() {
     const handleCallback = async () => {
       let retries = 0;
       const maxRetries = 3;
-      
+
       while (retries < maxRetries) {
         try {
           const user = await getMe();
@@ -23,17 +25,20 @@ export default function CallbackPage() {
             router.replace('/profiles');
           }
           return;
-        } catch (error) {
+        } catch (error: unknown) {
           retries++;
-          console.error(`Authentication attempt ${retries} failed:`, error);
-          
+          toast.error(
+            (error as APIError).message ||
+              `Authentication attempt ${retries} failed:`
+          );
+
           if (retries < maxRetries) {
             // Wait before retrying
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
           }
         }
       }
-      
+
       // After all retries fail, redirect to login
       const returnTo = '/auth/callback';
       router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`);

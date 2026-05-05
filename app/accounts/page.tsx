@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { getMe, logout } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { APIError } from '@/lib/error.handler';
 
 type User = {
   id: string;
@@ -22,8 +24,9 @@ export default function UserAccountPage() {
     setLoggingOut(true);
     try {
       await logout();
-    } catch (err) {
-      console.error('Logout failed:', err);
+    } catch {
+      toast.error('Failed to log out. Please try again.');
+    } finally {
       setLoggingOut(false);
     }
   };
@@ -33,8 +36,10 @@ export default function UserAccountPage() {
       try {
         const data = await getMe();
         setUser(data);
-      } catch (err) {
-        console.error('Failed to fetch user', err);
+      } catch (err: unknown) {
+        toast.error(
+          (err as APIError).message || 'Failed to fetch user. Please try again.'
+        );
         setUser(null);
       } finally {
         setLoading(false);

@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getMe, getProfiles } from '@/lib/api';
+import toast from 'react-hot-toast';
+import { APIError } from '@/lib/error.handler';
 
 type Stats = {
   totalProfiles: number;
@@ -32,6 +34,7 @@ export default function AdminDashboard() {
 
         if (user.role !== 'admin') {
           router.replace('/profiles');
+          toast.error('You must be logged in as an admin to access this page');
           return;
         }
 
@@ -43,9 +46,12 @@ export default function AdminDashboard() {
         setStats({
           totalProfiles: profileResponse.total ?? 0,
         });
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Failed to load admin dashboard', err);
-        router.replace('/login');
+        toast.error(
+          (err as APIError).message ||
+            'Failed to load dashboard. Please try again.'
+        );
       } finally {
         setLoading(false);
       }
