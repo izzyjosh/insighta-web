@@ -102,12 +102,11 @@ export default function ProfilesPage() {
         setNextLink(data.links.next);
         setPrevLink(data.links.prev);
       } catch (err: unknown) {
-        console.error('Failed to fetch profiles', err);
-        setProfiles([]);
-        setError(
+        toast.error(
           (err as APIError).message ||
-            'Failed to fetch profiles. Please try again.'
+            'Failed to load profiles. Please try again.'
         );
+        setProfiles([]);
       } finally {
         setLoading(false);
       }
@@ -144,7 +143,6 @@ export default function ProfilesPage() {
     try {
       await exportProfiles({ gender, country });
     } catch (err: unknown) {
-      console.error('Export failed:', err);
       toast.error(
         (err as APIError).message ||
           'Failed to export profiles. Please try again.'
